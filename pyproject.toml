@@ -1,0 +1,24 @@
+[project]
+name = "gonaibo"
+version = "0.0.1"
+description = "ADCIRC storm surge attenuation analysis"
+readme = "README.md"
+license = "MIT"
+authors = [
+  {name = "Alexandre E. S. Georges", email = "aes.georges@gmail.com"}
+]
+maintainers = []
+requires-python = ">=3.11"
+dependencies = [
+  "kalpana >= 0.0.23"
+]
+keywords = ["packaging"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+]
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+]
