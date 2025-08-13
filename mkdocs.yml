@@ -1,0 +1,4 @@
+site_name: Gonaibo Documentation
+site_url: https://aesgeorges.github.io/gonaibo
+theme:
+  name: readthedocs
