@@ -1,6 +1,6 @@
 [project]
 name = "gonaibo"
-version = "0.0.1"
+version = "0.0.1a0"
 description = "ADCIRC storm surge attenuation analysis"
 readme = "README.md"
 license = "MIT"
