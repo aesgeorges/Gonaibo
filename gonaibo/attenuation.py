@@ -1,6 +1,9 @@
 from typing import List, Dict, Any, Optional
+from shapely.geometry import Polygon
 import netCDF4 as netcdf
+import geopandas as gpd
 import numpy as np
+
 
 class Attenuation:
     """
@@ -91,6 +94,10 @@ class Attenuation:
 
 
     def compute_scenarios_protection(self):
+        """
+           Compute the protection effect of storm surge attenuation for all cover and no cover scenarios loaded in Attenuation Class. 
+        """
+
         data_protection = {}      
         # Iterate through scenarios and horizons  
         for scenario in self.scenarios:
@@ -142,3 +149,52 @@ class Attenuation:
         results['attrs'] = data_mangrove['attrs']
         
         return results
+
+
+    def calculate_flooded_area(self, center_lon: float, center_lat: float, data: Dict) -> float:
+        """
+            Calculate flooded area using geopandas with equal-area projection.
+
+            Attributes:
+            center_lon (float): Longitude of centered location for reprojection.
+            center_lat (float): Latitude of centered location for reprojection.
+        """
+        flooded_polygons = []
+        
+        # Pulling mesh data from Dict
+        x = data['x'][:]
+        y = data['y'][:]
+        elements = data['element'][:]
+        
+        # Make overland flooding masks
+        ### TODO: check this logic, this will not cover inland areas under mSL that are 100% getting flooded if the surge reaches.
+        land_mask = data['depth'][:] < 0
+        flood_mask = (data['zeta_max'][:] > 0) & land_mask
+
+        # Build polygon of flooded areas.
+        for elem in elements:
+            v1, v2, v3 = elem - 1 # Adjust for ADCIRC's one-based indexing
+            
+            if flood_mask[v1] or flood_mask[v2] or flood_mask[v3]:
+                triangle = Polygon([(x[v1], y[v1]), 
+                                    (x[v2], y[v2]),
+                                    (x[v3], y[v3])])
+                if triangle.is_valid:
+                    flooded_polygons.append(triangle)
+
+        if len(flooded_polygons) == 0:
+            return 0
+
+        # Create geodataframe for later calculations.
+        gdf = gpd.GeoDataFrame(geometry=flooded_polygons, crs='EPSG:4326')
+
+        # Use Lambert Azimuthal Equal Area projection at center-lat-lon for accurate area calculation
+        equal_area_proj = f'+proj=laea +lat_0={center_lat} +lon_0={center_lon} +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'
+
+        # Convert geodf to equal area proj
+        gdf_projected = gdf.to_crs(equal_area_proj)
+
+        # Calculate total area of flooded polygons in km2
+        total_area_km2 = gdf_projected.geometry.area.sum() / 1e6
+
+        return total_area_km2        
