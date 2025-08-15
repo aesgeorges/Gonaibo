@@ -1,6 +1,6 @@
 [project]
 name = "gonaibo"
-version = "0.0.1a0"
+version = "0.0.1a1"
 description = "ADCIRC storm surge attenuation analysis"
 readme = "README.md"
 license = "MIT"
@@ -8,7 +8,7 @@ authors = [
   {name = "Alexandre E. S. Georges", email = "aes.georges@gmail.com"}
 ]
 maintainers = []
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
   "kalpana >= 0.0.23"
 ]
@@ -23,5 +23,5 @@ requires = [
   "setuptools",
 ]
 
-[tool.setuptools]
-py-modules = ["attenuation"]
+[tool.setuptools.packages.find]
+exclude = ["docs*", "notebooks*"]
